@@ -4,6 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>Fluxor.Blazor.Persistence</Title>
+    <Authors>Anis Batliwala</Authors>
+    <Company>Micro Creations Ltd</Company>
+    <Description>Persistence for Fluxor Blazor.Web
+Beta version </Description>
+    <PackageProjectUrl>https://github.com/batliwalaa/blazor-fluxor-persistence</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>Persistence; Redux; Flux; Blazor; Fluxor; Csharp; DotNet</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>$(AssemblyName)-beta1.0.0</PackageId>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,9 +22,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Fluxor" Version="5.9.1" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="5.9.1" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(SolutionDir)Fluxor.Blazor.Persistence\bin\$(Configuration)\*.nupkg&quot; &quot;$(SolutionDir)..\..\Nuget-Local-Packages\*.nupkg&quot; /v /y /i /f " />
+  </Target>
 
 </Project>
