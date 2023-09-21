@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Fluxor.Blazor.Persistence.Store;
+﻿namespace Fluxor.Blazor.Persistence.Store;
 
 public class LoadPersistedStateSuccessAction
 {

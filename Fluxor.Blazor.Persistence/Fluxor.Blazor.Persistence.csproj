@@ -7,14 +7,20 @@
     <Title>Fluxor.Blazor.Persistence</Title>
     <Authors>Anis Batliwala</Authors>
     <Company>Micro Creations Ltd</Company>
-    <Description>Persistence for Fluxor Blazor.Web
-Beta version </Description>
+    <Description>
+      Persistence for Fluxor Blazor.Web
+      Beta version
+    </Description>
     <PackageProjectUrl>https://github.com/batliwalaa/blazor-fluxor-persistence</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Persistence; Redux; Flux; Blazor; Fluxor; Csharp; DotNet</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>$(AssemblyName)-beta1.0.0</PackageId>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <FileVersion>1.0.1</FileVersion>
+    <Version>1.0.1</Version>
+    <VersionSuffix>-beta</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +28,10 @@ Beta version </Description>
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

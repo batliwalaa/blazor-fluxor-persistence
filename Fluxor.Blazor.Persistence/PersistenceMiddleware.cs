@@ -1,4 +1,5 @@
-﻿using Fluxor.Blazor.Web.Middlewares.Routing;
+﻿using Fluxor.Blazor.Persistence.Store;
+using Fluxor.Blazor.Web.Middlewares.Routing;
 using System.Text.Json;
 
 namespace Fluxor.Blazor.Persistence;
@@ -23,37 +24,54 @@ internal sealed class PersistenceMiddleware : Middleware
 
     foreach (IFeature feature in _store.Features.Values.OrderBy(x => x.GetName()))
     {
-      string featureState = await _localStoragePersistenceService.LoadAsync(feature.GetName()).ConfigureAwait(false);
-      if (!string.IsNullOrWhiteSpace(featureState))
+      feature.StateChanged += Feature_StateChanged;
+      try
       {
-        var state = JsonSerializer.Deserialize(featureState, feature.GetStateType());
-        feature.RestoreState(state);
+        string featureState = await _localStoragePersistenceService.LoadAsync(feature.GetName()).ConfigureAwait(false);
 
-        if (feature.GetName() == "@routing")
+        if (!string.IsNullOrWhiteSpace(featureState))
         {
-          string? routeUri = (state as RoutingState)?.Uri;
+          var state = JsonSerializer.Deserialize(featureState, feature.GetStateType());
+          feature.RestoreState(state);
 
-          if (!string.IsNullOrWhiteSpace(routeUri))
+          if (feature.GetName() == "@routing")
           {
-            _dispatcher.Dispatch(new GoAction(routeUri));
+            string? routeUri = (state as RoutingState)?.Uri;
+
+            if (!string.IsNullOrWhiteSpace(routeUri))
+            {
+              _dispatcher.Dispatch(new GoAction(routeUri));
+            }
           }
         }
+      }
+      catch (Exception ex)
+      {
+        _dispatcher.Dispatch(new LoadPersistedStateFailureAction(feature.GetName(), ex));
       }
     }
 
     await Task.CompletedTask;
   }
 
-  public override void AfterDispatch(object action)
+  private void Feature_StateChanged(object? feature, EventArgs e)
   {
-    lock (SyncRoot)
+    if (feature != null)
     {
-      if (_store != null)
+      IFeature stateChangeFeature = (IFeature)feature;
+      lock (SyncRoot)
       {
-        foreach (IFeature feature in _store.Features.Values.OrderBy(x => x.GetName()))
+        try
         {
-          _localStoragePersistenceService.SaveAsync(
-            feature.GetName(), feature.GetState()).ConfigureAwait(false);
+          if (stateChangeFeature.GetName() != "@StatePersistence")
+          {
+            _localStoragePersistenceService.SaveAsync(
+              stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
+          }
+        }
+        catch (Exception ex)
+        {
+          _dispatcher?.Dispatch(new SavePersistedStateFailureAction(stateChangeFeature.GetName(), ex));
         }
       }
     }
