@@ -8,7 +8,7 @@ public static class OptionsPersistenceExtensions
 {
   public static FluxorOptions UsePersistence(
     this FluxorOptions options,
-    Action<PersistOtions>? configurePersistOptions)
+    Action<PersistOtions> configurePersistOptions = null)
   {
     PersistOtions persistOptions = new();
     configurePersistOptions?.Invoke(persistOptions);

@@ -44,8 +44,4 @@
     <PackageReference Include="Fluxor.Blazor.Web" Version="5.9.1" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(SolutionDir)Fluxor.Blazor.Persistence\bin\$(Configuration)\*.nupkg&quot; &quot;$(SolutionDir)..\..\Nuget-Local-Packages\*.nupkg&quot; /v /y /i /f " />
-  </Target>
-
 </Project>

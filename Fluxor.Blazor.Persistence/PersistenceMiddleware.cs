@@ -1,7 +1,8 @@
 ﻿using Fluxor.Blazor.Persistence.Store;
 using Fluxor.Blazor.Web.Middlewares.Routing;
-using System.Text.Json;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Fluxor.Blazor.Persistence.Tests")]
 namespace Fluxor.Blazor.Persistence;
 
 internal sealed class PersistenceMiddleware : Middleware
@@ -27,21 +28,19 @@ internal sealed class PersistenceMiddleware : Middleware
       feature.StateChanged += Feature_StateChanged;
       try
       {
-        string featureState = await _localStoragePersistenceService.LoadAsync(feature.GetName()).ConfigureAwait(false);
+        var featureState = await _localStoragePersistenceService.LoadAsync(
+          feature.GetName(),
+          feature.GetStateType()
+          ).ConfigureAwait(false);
+        feature.RestoreState(featureState);
 
-        if (!string.IsNullOrWhiteSpace(featureState))
+        if (feature.GetName() == "@routing")
         {
-          var state = JsonSerializer.Deserialize(featureState, feature.GetStateType());
-          feature.RestoreState(state);
+          string? routeUri = (featureState as RoutingState)?.Uri;
 
-          if (feature.GetName() == "@routing")
+          if (!string.IsNullOrWhiteSpace(routeUri))
           {
-            string? routeUri = (state as RoutingState)?.Uri;
-
-            if (!string.IsNullOrWhiteSpace(routeUri))
-            {
-              _dispatcher.Dispatch(new GoAction(routeUri));
-            }
+            _dispatcher.Dispatch(new GoAction(routeUri));
           }
         }
       }

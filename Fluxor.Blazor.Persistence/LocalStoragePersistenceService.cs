@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Fluxor.Blazor.Persistence;
 
-public sealed class LocalStoragePersistenceService
+internal sealed class LocalStoragePersistenceService
 {
   private readonly ILocalStorageService _localStorageService;
   private readonly PersistOtions _persistOptions;
@@ -18,8 +18,15 @@ public sealed class LocalStoragePersistenceService
     await _localStorageService.SetItemAsync($"{_persistOptions.PersistenceKey}_{key}", JsonSerializer.Serialize(state, typeof(T)));
   }
 
-  public async Task<string> LoadAsync(string key)
+  public async Task<object?> LoadAsync(string key, Type featureType)
   {
-    return await _localStorageService.GetItemAsync<string>($"{_persistOptions.PersistenceKey}_{key}");
+    string featureState = await _localStorageService.GetItemAsync<string>($"{_persistOptions.PersistenceKey}_{key}");
+
+    if (string.IsNullOrWhiteSpace(featureState))
+    {
+      return null;
+    }
+
+    return JsonSerializer.Deserialize(featureState ?? string.Empty, featureType);
   }
 }
