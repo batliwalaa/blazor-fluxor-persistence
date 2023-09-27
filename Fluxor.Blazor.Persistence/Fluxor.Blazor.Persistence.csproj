@@ -9,18 +9,16 @@
     <Company>Micro Creations Ltd</Company>
     <Description>
       Persistence for Fluxor Blazor.Web
-      Beta version
     </Description>
     <PackageProjectUrl>https://github.com/batliwalaa/blazor-fluxor-persistence</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>Persistence; Redux; Flux; Blazor; Fluxor; Csharp; DotNet</PackageTags>
+    <PackageTags>Persistence, ; Redux, ; Flux, ; Blazor, ; Fluxor, ; C#, ; DotNet</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>$(AssemblyName)-beta1.0.0</PackageId>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <PackageId>$(AssemblyName)</PackageId>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <FileVersion>1.0.1</FileVersion>
-    <Version>1.0.1</Version>
-    <VersionSuffix>-beta</VersionSuffix>
+    <FileVersion>1.1.0</FileVersion>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

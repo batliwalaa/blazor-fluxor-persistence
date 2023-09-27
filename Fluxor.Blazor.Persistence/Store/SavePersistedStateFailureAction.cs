@@ -2,6 +2,7 @@
 
 public class SavePersistedStateFailureAction
 {
+  public string ActionType => "Save";
   public string FeatureName { get; private set; } = string.Empty;
   public Exception Exception { get; private set; }
 

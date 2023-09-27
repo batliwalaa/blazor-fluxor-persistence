@@ -8,12 +8,12 @@ namespace Fluxor.Blazor.Persistence;
 internal sealed class PersistenceMiddleware : Middleware
 {
   private IStore? _store;
-  private readonly LocalStoragePersistenceService _localStoragePersistenceService;
+  private readonly ILocalStoragePersistenceService _localStoragePersistenceService;
   private IDispatcher? _dispatcher;
-  private readonly object SyncRoot = new();
+  private readonly object _syncRoot = new();
 
   public PersistenceMiddleware(
-    LocalStoragePersistenceService localStoragePersistenceService)
+    ILocalStoragePersistenceService localStoragePersistenceService)
   {
     _localStoragePersistenceService = localStoragePersistenceService;
   }
@@ -23,7 +23,9 @@ internal sealed class PersistenceMiddleware : Middleware
     _store = store;
     _dispatcher = dispatcher;
 
-    foreach (IFeature feature in _store.Features.Values.OrderBy(x => x.GetName()))
+    IEnumerable<IFeature> features = _store.Features.Values;
+
+    foreach (IFeature feature in features.OrderBy(x => x.GetName()))
     {
       feature.StateChanged += Feature_StateChanged;
       try
@@ -58,7 +60,7 @@ internal sealed class PersistenceMiddleware : Middleware
     if (feature != null)
     {
       IFeature stateChangeFeature = (IFeature)feature;
-      lock (SyncRoot)
+      lock (_syncRoot)
       {
         try
         {

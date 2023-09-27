@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
+using Bunit;
 using FluentAssertions;
-using Fluxor.Blazor.Persistence.Tests.helpers;
 using Fluxor.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -8,7 +8,7 @@ using Moq;
 
 namespace Fluxor.Blazor.Persistence.Tests;
 
-public class OptionsPersistenceExtensionsTests : TestContext
+public class OptionsPersistenceExtensionsTests : TestContextBase
 {
 
   public class PersistenceWithLocalStorage : OptionsPersistenceExtensionsTests
@@ -28,7 +28,7 @@ public class OptionsPersistenceExtensionsTests : TestContext
       Services.GetRequiredService<PersistOtions>().Should().NotBeNull();
       Services.GetRequiredService<PersistenceMiddleware>().Should().NotBeNull();
       Services.GetRequiredService<ILocalStorageService>().Should().NotBeNull();
-      Services.GetRequiredService<LocalStoragePersistenceService>().Should().NotBeNull();
+      Services.GetRequiredService<ILocalStoragePersistenceService>().Should().NotBeNull();
     }
   }
 }

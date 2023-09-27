@@ -8,7 +8,7 @@ public static class OptionsPersistenceExtensions
 {
   public static FluxorOptions UsePersistence(
     this FluxorOptions options,
-    Action<PersistOtions> configurePersistOptions = null)
+    Action<PersistOtions>? configurePersistOptions = null)
   {
     PersistOtions persistOptions = new();
     configurePersistOptions?.Invoke(persistOptions);
@@ -23,7 +23,7 @@ public static class OptionsPersistenceExtensions
         options.JsonSerializerOptions.WriteIndented = true);
 
       options.Services.Add(new ServiceDescriptor(
-        typeof(LocalStoragePersistenceService),
+        typeof(ILocalStoragePersistenceService),
         typeof(LocalStoragePersistenceService),
         ServiceLifetime.Singleton));
     }

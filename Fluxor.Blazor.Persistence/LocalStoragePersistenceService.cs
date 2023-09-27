@@ -1,9 +1,11 @@
 ﻿using Blazored.LocalStorage;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
+//[assembly: InternalsVisibleTo("Fluxor.Blazor.Persistence.Tests")]
 namespace Fluxor.Blazor.Persistence;
 
-internal sealed class LocalStoragePersistenceService
+internal sealed class LocalStoragePersistenceService : ILocalStoragePersistenceService
 {
   private readonly ILocalStorageService _localStorageService;
   private readonly PersistOtions _persistOptions;

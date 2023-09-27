@@ -2,6 +2,7 @@
 
 public class StatePersistenceExceptionItem
 {
+  public string ActionType { get; set; } = string.Empty;
   public string FeatureName { get; set; } = string.Empty;
   public Exception? Exception { get; set; }
 }

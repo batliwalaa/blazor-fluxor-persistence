@@ -7,7 +7,28 @@ public static class StatePersistenceReducers
     StatePersistenceFailureState state,
     LoadPersistedStateFailureAction action)
   {
-    state.Errors.Add(new StatePersistenceExceptionItem { FeatureName = action.FeatureName, Exception = action.Exception });
+    state.Errors.Add(new StatePersistenceExceptionItem 
+    { 
+      ActionType = action.ActionType,
+      FeatureName = action.FeatureName,
+      Exception = action.Exception
+    });
+
+    return state;
+  }
+
+  [ReducerMethod]
+  public static StatePersistenceFailureState OnSavePersistedStateFailure(
+    StatePersistenceFailureState state,
+    SavePersistedStateFailureAction action)
+  {
+    state.Errors.Add(new StatePersistenceExceptionItem 
+    {
+      ActionType = action.ActionType,
+      FeatureName = action.FeatureName,
+      Exception = action.Exception
+    });
+
     return state;
   }
 

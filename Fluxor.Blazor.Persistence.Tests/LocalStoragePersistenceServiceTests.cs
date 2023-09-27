@@ -8,13 +8,15 @@ namespace Fluxor.Blazor.Persistence.Tests;
 public class LocalStoragePersistenceServiceTests
 {
   private Mock<ILocalStorageService> _mockLocalStorageService;
-  private LocalStoragePersistenceService _sut;
+  private ILocalStoragePersistenceService _sut;
   private PersistOtions _persistOtions = new();
 
   public LocalStoragePersistenceServiceTests()
   {
     _mockLocalStorageService = new Mock<ILocalStorageService>();
-    _sut = new(_mockLocalStorageService.Object, _persistOtions);
+    _sut = new LocalStoragePersistenceService(
+      _mockLocalStorageService.Object,
+      _persistOtions);
   }
 
   [Fact]
