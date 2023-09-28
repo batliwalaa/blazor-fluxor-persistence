@@ -9,13 +9,16 @@ internal sealed class PersistenceMiddleware : Middleware
 {
   private IStore? _store;
   private readonly ILocalStoragePersistenceService _localStoragePersistenceService;
+  private readonly PersistOtions _persistOtions;
   private IDispatcher? _dispatcher;
   private readonly object _syncRoot = new();
 
   public PersistenceMiddleware(
-    ILocalStoragePersistenceService localStoragePersistenceService)
+    ILocalStoragePersistenceService localStoragePersistenceService,
+    PersistOtions persistOtions)
   {
     _localStoragePersistenceService = localStoragePersistenceService;
+    _persistOtions = persistOtions;
   }
 
   public override async Task InitializeAsync(IDispatcher dispatcher, IStore store)
@@ -27,22 +30,28 @@ internal sealed class PersistenceMiddleware : Middleware
 
     foreach (IFeature feature in features.OrderBy(x => x.GetName()))
     {
-      feature.StateChanged += Feature_StateChanged;
       try
       {
-        var featureState = await _localStoragePersistenceService.LoadAsync(
+        string featureName = feature.GetName().ToLower();
+
+        if (featureName != "@routing" || (featureName == "@routing" && _persistOtions.PersistRoutes))
+        {
+          feature.StateChanged += Feature_StateChanged;
+          var featureState = await _localStoragePersistenceService.LoadAsync(
           feature.GetName(),
           feature.GetStateType()
           ).ConfigureAwait(false);
-        feature.RestoreState(featureState);
 
-        if (feature.GetName() == "@routing")
-        {
-          string? routeUri = (featureState as RoutingState)?.Uri;
+          feature.RestoreState(featureState);
 
-          if (!string.IsNullOrWhiteSpace(routeUri))
+          if (feature.GetName().ToLower() == "@routing")
           {
-            _dispatcher.Dispatch(new GoAction(routeUri));
+            string? routeUri = (featureState as RoutingState)?.Uri;
+
+            if (!string.IsNullOrWhiteSpace(routeUri))
+            {
+              _dispatcher.Dispatch(new GoAction(routeUri));
+            }
           }
         }
       }
@@ -64,10 +73,11 @@ internal sealed class PersistenceMiddleware : Middleware
       {
         try
         {
-          if (stateChangeFeature.GetName() != "@StatePersistence")
+          string featureName = stateChangeFeature.GetName().ToLower();
+          if (featureName != "@statepersistence")
           {
             _localStoragePersistenceService.SaveAsync(
-              stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
+                stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
           }
         }
         catch (Exception ex)

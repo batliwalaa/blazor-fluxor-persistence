@@ -30,5 +30,20 @@ public class OptionsPersistenceExtensionsTests : TestContextBase
       Services.GetRequiredService<ILocalStorageService>().Should().NotBeNull();
       Services.GetRequiredService<ILocalStoragePersistenceService>().Should().NotBeNull();
     }
+
+    [Fact]
+    public void When_Invalid_PersistenceType()
+    {
+      // Arrange.
+      FluxorOptions options = new(Services);
+      Mock<IJSRuntime> mockJsRuntime = new();
+      Services.Add(new ServiceDescriptor(typeof(IJSRuntime), mockJsRuntime.Object));
+
+      // Act.
+      Action act = () => options.UsePersistence(x => x.PersistenceType = PersistenceType.IndexedDb);
+
+      // Assert.
+      act.Should().Throw<InvalidOperationException>();
+    }
   }
 }

@@ -15,10 +15,8 @@
     <PackageTags>Persistence, ; Redux, ; Flux, ; Blazor, ; Fluxor, ; C#, ; DotNet</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>$(AssemblyName)</PackageId>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <FileVersion>1.1.0</FileVersion>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

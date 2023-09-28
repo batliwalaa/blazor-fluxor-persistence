@@ -2,6 +2,7 @@
 
 Fluxor state persistence for web blazor application using LocalStorage.
 Currently supports LocalStorage only.
+Supports LocalStorage persistence only which is default, if set to other options - state will not persist.
 
 ## Usage
 In Program.cs file Add UsePersistence to FluxorOptions
@@ -17,6 +18,18 @@ builder.Services
     o.ScanAssemblies(typeof(Program).Assembly)
     .UseRouting()
     .UsePersistence();
+  });
+```
+
+Using routing middleware but do not want to persist routes (default value for PersistOptions.PersistRoutes is true)
+
+```C#
+builder.Services
+  .AddFluxor(o =>
+  {
+    o.ScanAssemblies(typeof(Program).Assembly)
+    .UseRouting()
+    .UsePersistence(x => x.PersistRoutes = false);
   });
 ```
 
@@ -69,3 +82,17 @@ else
   }
 }
 ```
+
+
+### Release 1.2.0 change log
+
+```C#
+public class PersistOtions
+{
+  public PersistenceType PersistenceType { get; set; } = PersistenceType.LocalStorage;
+  public string PersistenceKey { get; set; } = "Fluxor.Blazor.Persistence";
+  public bool PersistRoutes { get; set; } = true;
+}
+```
+
+Added new PersistRoutes flag - default true.

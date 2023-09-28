@@ -17,7 +17,7 @@ public static class OptionsPersistenceExtensions
     options.Services.Add(new ServiceDescriptor(
         typeof(PersistOtions), persistOptions));
 
-    if (persistOptions.PersistenceType == PersistenceType.LocalStorage)
+    if (IsValidPersistenceType(persistOptions))
     {
       options.Services.AddBlazoredLocalStorageAsSingleton(options =>
         options.JsonSerializerOptions.WriteIndented = true);
@@ -29,5 +29,15 @@ public static class OptionsPersistenceExtensions
     }
 
     return options;
+  }
+
+  private static bool IsValidPersistenceType(PersistOtions persistOtions)
+  {
+    if (persistOtions.PersistenceType == PersistenceType.LocalStorage)
+    {
+      return true;
+    }
+
+    throw new InvalidOperationException($"{persistOtions.PersistenceType} is not supported.");
   }
 }

@@ -16,9 +16,7 @@ public class PersistenceMiddlewareTests : TestContext
 {
   private IStore? _store;
   private IDispatcher? _dispatcher;
-  private IState<StatePersistenceFailureState>? _state;
   private readonly Mock<ILocalStoragePersistenceService> _mockLocalStoragePersistenceService;
-  private readonly PersistenceMiddleware _sut;
 
   public PersistenceMiddlewareTests()
   {
@@ -26,7 +24,6 @@ public class PersistenceMiddlewareTests : TestContext
     Services.AddSingleton<FakeNavigationManager>();
     Services.AddSingleton<NavigationManager>(s => s.GetRequiredService<FakeNavigationManager>());
     _mockLocalStoragePersistenceService = new Mock<ILocalStoragePersistenceService>();
-    _sut = new PersistenceMiddleware(_mockLocalStoragePersistenceService.Object);
   }
 
   [Fact]
@@ -46,11 +43,12 @@ public class PersistenceMiddlewareTests : TestContext
     _mockLocalStoragePersistenceService.Setup(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()));
 
+    PersistenceMiddleware sut = new (_mockLocalStoragePersistenceService.Object, new PersistOtions());
     var dispatcherSpy = new DispatcherSpy(_dispatcher);
     var storeSpy = new StoreSpy(_store);
     var navigationManager = Services.GetRequiredService<NavigationManager>();
     // Act.
-    await _sut.InitializeAsync(dispatcherSpy, storeSpy);
+    await sut.InitializeAsync(dispatcherSpy, storeSpy);
 
     // Assert.
     using (new AssertionScope())
@@ -84,12 +82,13 @@ public class PersistenceMiddlewareTests : TestContext
     _mockLocalStoragePersistenceService.Setup(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()));
 
+    PersistenceMiddleware sut = new(_mockLocalStoragePersistenceService.Object, new PersistOtions());
     var dispatcherSpy = new DispatcherSpy(_dispatcher);
     var storeSpy = new StoreSpy(_store);
     var navigationManager = Services.GetRequiredService<NavigationManager>();
 
     // Act.
-    await _sut.InitializeAsync(dispatcherSpy, storeSpy);
+    await sut.InitializeAsync(dispatcherSpy, storeSpy);
 
     // Assert.
     using (new AssertionScope())
@@ -124,12 +123,13 @@ public class PersistenceMiddlewareTests : TestContext
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()))
       .Throws(new Exception());
 
+    PersistenceMiddleware sut = new(_mockLocalStoragePersistenceService.Object, new PersistOtions());
     var dispatcherSpy = new DispatcherSpy(_dispatcher);
     var storeSpy = new StoreSpy(_store);
     var navigationManager = Services.GetRequiredService<NavigationManager>();
 
     // Act.
-    await _sut.InitializeAsync(dispatcherSpy, storeSpy);
+    await sut.InitializeAsync(dispatcherSpy, storeSpy);
 
     // Assert.
     using (new AssertionScope())
@@ -149,6 +149,42 @@ public class PersistenceMiddlewareTests : TestContext
 
       _mockLocalStoragePersistenceService.Verify(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+    }
+  }
+
+  [Fact]
+  public async Task Routing_Feature_With_PersistRoutes_False()
+  {
+    // Arrange.
+    Services.AddFluxor(o =>
+      o.ScanAssemblies(typeof(StatePersistenceFailureState).Assembly)
+        .UseRouting());
+    _store = Services.GetRequiredService<IStore>();
+    _dispatcher = Services.GetRequiredService<IDispatcher>();
+    _store.InitializeAsync().Wait();
+
+    _mockLocalStoragePersistenceService.Setup(x =>
+        x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()))
+      .ReturnsAsync(new RoutingState("https://localhost/route"));
+    _mockLocalStoragePersistenceService.Setup(x =>
+        x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()));
+
+    PersistenceMiddleware sut = new(_mockLocalStoragePersistenceService.Object, new PersistOtions() { PersistRoutes = false });
+    var dispatcherSpy = new DispatcherSpy(_dispatcher);
+    var storeSpy = new StoreSpy(_store);
+    // Act.
+    await sut.InitializeAsync(dispatcherSpy, storeSpy);
+
+    // Assert.
+    using (new AssertionScope())
+    {
+      dispatcherSpy.DispatchTimes.Should().Be(Times.Never());
+      storeSpy.FeaturesTimes.Should().Be(Times.Once());
+
+      _mockLocalStoragePersistenceService.Verify(x =>
+        x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()), Times.Never);
+      _mockLocalStoragePersistenceService.Verify(x =>
+        x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
     }
   }
 }
