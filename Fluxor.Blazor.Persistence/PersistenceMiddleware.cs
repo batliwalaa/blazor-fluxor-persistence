@@ -42,7 +42,10 @@ internal sealed class PersistenceMiddleware : Middleware
           feature.GetStateType()
           ).ConfigureAwait(false);
 
-          feature.RestoreState(featureState);
+          if (featureState != null)
+          {
+            feature.RestoreState(featureState);
+          }
 
           if (feature.GetName().ToLower() == "@routing")
           {
@@ -77,7 +80,7 @@ internal sealed class PersistenceMiddleware : Middleware
           if (featureName != "@statepersistence")
           {
             _localStoragePersistenceService.SaveAsync(
-                stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
+                  stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
           }
         }
         catch (Exception ex)

@@ -43,7 +43,7 @@ public class PersistenceMiddlewareTests : TestContext
     _mockLocalStoragePersistenceService.Setup(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()));
 
-    PersistenceMiddleware sut = new (_mockLocalStoragePersistenceService.Object, new PersistOtions());
+    PersistenceMiddleware sut = new(_mockLocalStoragePersistenceService.Object, new PersistOtions());
     var dispatcherSpy = new DispatcherSpy(_dispatcher);
     var storeSpy = new StoreSpy(_store);
     var navigationManager = Services.GetRequiredService<NavigationManager>();
@@ -120,6 +120,9 @@ public class PersistenceMiddlewareTests : TestContext
     _store.InitializeAsync().Wait();
 
     _mockLocalStoragePersistenceService.Setup(x =>
+        x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()))
+      .ReturnsAsync(new RoutingState("https://localhost/route"));
+    _mockLocalStoragePersistenceService.Setup(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()))
       .Throws(new Exception());
 
@@ -135,20 +138,20 @@ public class PersistenceMiddlewareTests : TestContext
     using (new AssertionScope())
     {
       dispatcherSpy.Should().NotBeNull();
-      dispatcherSpy.DispatchTimes.Should().Be(Times.Once());
+      dispatcherSpy.DispatchTimes.Should().Be(Times.Exactly(4));
       dispatcherSpy.DispatchedActions
-        .Single(x => x is SavePersistedStateFailureAction)
+        .First(x => x is SavePersistedStateFailureAction)
         .Should()
         .NotBeNull();
       dispatcherSpy.DispatchedActions
-        .Single(x => x is SavePersistedStateFailureAction)
+        .First(x => x is SavePersistedStateFailureAction)
         .As<SavePersistedStateFailureAction>().FeatureName
         .Should()
         .Be("@routing");
       storeSpy.FeaturesTimes.Should().Be(Times.Once());
 
       _mockLocalStoragePersistenceService.Verify(x =>
-        x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+        x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Exactly(2));
     }
   }
 
@@ -185,6 +188,42 @@ public class PersistenceMiddlewareTests : TestContext
         x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()), Times.Never);
       _mockLocalStoragePersistenceService.Verify(x =>
         x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+    }
+  }
+
+  [Fact]
+  public async Task When_FeatureState_IsNull_ShouldNot_Restore_FeatureState()
+  {
+    // Arrange.
+    Services.AddFluxor(o =>
+      o.ScanAssemblies(typeof(StatePersistenceFailureState).Assembly));
+
+    _store = Services.GetRequiredService<IStore>();
+    _store.AddFeature(new StatePersistenceFailureFeature());
+    _dispatcher = Services.GetRequiredService<IDispatcher>();
+    _store.InitializeAsync().Wait();
+
+    _mockLocalStoragePersistenceService.Setup(x =>
+        x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()))
+      .ReturnsAsync(null);
+    _mockLocalStoragePersistenceService.Setup(x =>
+        x.SaveAsync(It.IsAny<string>(), It.IsAny<object>()));
+
+    PersistenceMiddleware sut = new(_mockLocalStoragePersistenceService.Object, new PersistOtions());
+    var dispatcherSpy = new DispatcherSpy(_dispatcher);
+    var storeSpy = new StoreSpy(_store);
+    var navigationManager = Services.GetRequiredService<NavigationManager>();
+
+    // Act.
+    await sut.InitializeAsync(dispatcherSpy, storeSpy);
+
+    // Assert.
+    using (new AssertionScope())
+    {
+      dispatcherSpy.DispatchTimes.Should().Be(Times.Exactly(0));
+
+      _mockLocalStoragePersistenceService.Verify(x =>
+        x.LoadAsync(It.IsAny<string>(), It.IsAny<Type>()), Times.Once);
     }
   }
 }

@@ -96,3 +96,9 @@ public class PersistOtions
 ```
 
 Added new PersistRoutes flag - default true.
+
+
+### Release 1.2.1 change log
+
+Issue: Persisted state for the feature is null, causes initial state to be null.  
+Fix: do not restore feature state if persisted loaded state is null.  
