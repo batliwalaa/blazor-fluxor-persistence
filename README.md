@@ -102,3 +102,7 @@ Added new PersistRoutes flag - default true.
 
 Issue: Persisted state for the feature is null, causes initial state to be null.  
 Fix: do not restore feature state if persisted loaded state is null.  
+
+### Release 1.2.2 change log
+
+Added .net7.0 as target framework
