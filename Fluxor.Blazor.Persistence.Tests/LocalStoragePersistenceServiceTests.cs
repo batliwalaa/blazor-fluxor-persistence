@@ -1,5 +1,5 @@
-﻿using Blazored.LocalStorage;
-using FluentAssertions;
+﻿using FluentAssertions;
+using Fluxor.Blazor.Persistence.BrowserStorage;
 using Fluxor.Blazor.Persistence.Store;
 using Moq;
 
@@ -7,13 +7,13 @@ namespace Fluxor.Blazor.Persistence.Tests;
 
 public class LocalStoragePersistenceServiceTests
 {
-  private Mock<ILocalStorageService> _mockLocalStorageService;
+  private Mock<IBrowserStorage> _mockLocalStorageService;
   private ILocalStoragePersistenceService _sut;
   private PersistOtions _persistOtions = new();
 
   public LocalStoragePersistenceServiceTests()
   {
-    _mockLocalStorageService = new Mock<ILocalStorageService>();
+    _mockLocalStorageService = new Mock<IBrowserStorage>();
     _sut = new LocalStoragePersistenceService(
       _mockLocalStorageService.Object,
       _persistOtions);
@@ -29,7 +29,7 @@ public class LocalStoragePersistenceServiceTests
       .Setup(x =>
         x.SetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
-          It.IsAny<object>(),
+          It.IsAny<string>(),
           CancellationToken.None))
       .Verifiable();
 
@@ -41,7 +41,7 @@ public class LocalStoragePersistenceServiceTests
       .Verify(
         x => x.SetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
-          It.IsAny<object>(),
+          It.IsAny<string>(),
           CancellationToken.None),
         Times.Once);
   }
@@ -53,7 +53,7 @@ public class LocalStoragePersistenceServiceTests
     var key = "Cart";
     _mockLocalStorageService
       .Setup(x =>
-        x.GetItemAsync<string>(
+        x.GetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
           CancellationToken.None))
       .ReturnsAsync(string.Empty)
@@ -66,7 +66,7 @@ public class LocalStoragePersistenceServiceTests
     // Assert.
     _mockLocalStorageService
       .Verify(x =>
-        x.GetItemAsync<string>(
+        x.GetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
           CancellationToken.None),
         Times.Once);
@@ -81,7 +81,7 @@ public class LocalStoragePersistenceServiceTests
     var key = "StatePersistence";
     _mockLocalStorageService
       .Setup(x =>
-        x.GetItemAsync<string>(
+        x.GetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
           CancellationToken.None))
       .ReturnsAsync(serializedState)
@@ -94,7 +94,7 @@ public class LocalStoragePersistenceServiceTests
     // Assert.
     _mockLocalStorageService
       .Verify(x =>
-        x.GetItemAsync<string>(
+        x.GetItemAsync(
           $"Fluxor.Blazor.Persistence_{key}",
           CancellationToken.None),
         Times.Once);

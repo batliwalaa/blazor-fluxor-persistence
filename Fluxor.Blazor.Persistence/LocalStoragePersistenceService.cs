@@ -1,34 +1,36 @@
-﻿using Blazored.LocalStorage;
-using System.Runtime.CompilerServices;
+﻿using Fluxor.Blazor.Persistence.BrowserStorage;
+using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 //[assembly: InternalsVisibleTo("Fluxor.Blazor.Persistence.Tests")]
-namespace Fluxor.Blazor.Persistence;
-
-internal sealed class LocalStoragePersistenceService : ILocalStoragePersistenceService
+namespace Fluxor.Blazor.Persistence
 {
-  private readonly ILocalStorageService _localStorageService;
-  private readonly PersistOtions _persistOptions;
-
-  public LocalStoragePersistenceService(
-    ILocalStorageService localStorageService,
-    PersistOtions persistOptions) =>
-      (_localStorageService, _persistOptions) = (localStorageService, persistOptions);
-
-  public async Task SaveAsync<T>(string key, T state)
+  internal sealed class LocalStoragePersistenceService : ILocalStoragePersistenceService
   {
-    await _localStorageService.SetItemAsync($"{_persistOptions.PersistenceKey}_{key}", JsonSerializer.Serialize(state, typeof(T)));
-  }
+    private readonly IBrowserStorage _browserStorage;
+    private readonly PersistOtions _persistOptions;
 
-  public async Task<object?> LoadAsync(string key, Type featureType)
-  {
-    string featureState = await _localStorageService.GetItemAsync<string>($"{_persistOptions.PersistenceKey}_{key}");
+    public LocalStoragePersistenceService(
+      IBrowserStorage browserStorage,
+      PersistOtions persistOptions) =>
+        (_browserStorage, _persistOptions) = (browserStorage, persistOptions);
 
-    if (string.IsNullOrWhiteSpace(featureState))
+    public async Task SaveAsync<T>(string key, T state)
     {
-      return null;
+      await _browserStorage.SetItemAsync($"{_persistOptions.PersistenceKey}_{key}", JsonSerializer.Serialize(state, typeof(T)));
     }
 
-    return JsonSerializer.Deserialize(featureState ?? string.Empty, featureType);
+    public async Task<object?> LoadAsync(string key, Type featureType)
+    {
+      string featureState = await _browserStorage.GetItemAsync($"{_persistOptions.PersistenceKey}_{key}");
+
+      if (string.IsNullOrWhiteSpace(featureState))
+      {
+        return null;
+      }
+
+      return JsonSerializer.Deserialize(featureState ?? string.Empty, featureType);
+    }
   }
 }

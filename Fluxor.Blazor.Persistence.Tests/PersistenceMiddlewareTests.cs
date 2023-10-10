@@ -1,8 +1,8 @@
-﻿using Blazored.LocalStorage;
-using Bunit;
+﻿using Bunit;
 using Bunit.TestDoubles;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Fluxor.Blazor.Persistence.BrowserStorage;
 using Fluxor.Blazor.Persistence.Store;
 using Fluxor.Blazor.Persistence.Tests.Helpers;
 using Fluxor.Blazor.Web.Middlewares.Routing;
@@ -20,7 +20,7 @@ public class PersistenceMiddlewareTests : TestContext
 
   public PersistenceMiddlewareTests()
   {
-    Services.Add(new ServiceDescriptor(typeof(ILocalStorageService), new Mock<ILocalStorageService>().Object));
+    Services.Add(new ServiceDescriptor(typeof(IBrowserStorage), new Mock<IBrowserStorage>().Object));
     Services.AddSingleton<FakeNavigationManager>();
     Services.AddSingleton<NavigationManager>(s => s.GetRequiredService<FakeNavigationManager>());
     _mockLocalStoragePersistenceService = new Mock<ILocalStoragePersistenceService>();

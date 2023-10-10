@@ -1,40 +1,41 @@
-﻿namespace Fluxor.Blazor.Persistence.Store;
-
-public static class StatePersistenceReducers
+﻿namespace Fluxor.Blazor.Persistence.Store
 {
-  [ReducerMethod]
-  public static StatePersistenceFailureState OnLoadPersistedStateFailure(
-    StatePersistenceFailureState state,
-    LoadPersistedStateFailureAction action)
+  public static class StatePersistenceReducers
   {
-    state.Errors.Add(new StatePersistenceExceptionItem 
-    { 
-      ActionType = action.ActionType,
-      FeatureName = action.FeatureName,
-      Exception = action.Exception
-    });
-
-    return state;
-  }
-
-  [ReducerMethod]
-  public static StatePersistenceFailureState OnSavePersistedStateFailure(
-    StatePersistenceFailureState state,
-    SavePersistedStateFailureAction action)
-  {
-    state.Errors.Add(new StatePersistenceExceptionItem 
+    [ReducerMethod]
+    public static StatePersistenceFailureState OnLoadPersistedStateFailure(
+      StatePersistenceFailureState state,
+      LoadPersistedStateFailureAction action)
     {
-      ActionType = action.ActionType,
-      FeatureName = action.FeatureName,
-      Exception = action.Exception
-    });
+      state.Errors.Add(new StatePersistenceExceptionItem
+      {
+        ActionType = action.ActionType,
+        FeatureName = action.FeatureName,
+        Exception = action.Exception
+      });
 
-    return state;
-  }
+      return state;
+    }
 
-  [ReducerMethod(typeof(ClearStatePersistenceFailureStateAction))]
-  public static StatePersistenceFailureState OnClearStatePersistenceFailureState(StatePersistenceFailureState state)
-  {
-    return state with { Errors = new() };
+    [ReducerMethod]
+    public static StatePersistenceFailureState OnSavePersistedStateFailure(
+      StatePersistenceFailureState state,
+      SavePersistedStateFailureAction action)
+    {
+      state.Errors.Add(new StatePersistenceExceptionItem
+      {
+        ActionType = action.ActionType,
+        FeatureName = action.FeatureName,
+        Exception = action.Exception
+      });
+
+      return state;
+    }
+
+    [ReducerMethod(typeof(ClearStatePersistenceFailureStateAction))]
+    public static StatePersistenceFailureState OnClearStatePersistenceFailureState(StatePersistenceFailureState state)
+    {
+      return state with { Errors = new() };
+    }
   }
 }

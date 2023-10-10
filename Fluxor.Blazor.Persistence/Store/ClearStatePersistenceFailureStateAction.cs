@@ -1,5 +1,6 @@
-﻿namespace Fluxor.Blazor.Persistence.Store;
-
-public class ClearStatePersistenceFailureStateAction
+﻿namespace Fluxor.Blazor.Persistence.Store
 {
+  public class ClearStatePersistenceFailureStateAction
+  {
+  }
 }

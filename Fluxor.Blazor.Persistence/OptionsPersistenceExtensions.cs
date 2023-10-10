@@ -1,43 +1,57 @@
-﻿using Blazored.LocalStorage;
+﻿using Fluxor.Blazor.Persistence.BrowserStorage;
 using Fluxor.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace Fluxor.Blazor.Persistence;
-
-public static class OptionsPersistenceExtensions
+namespace Fluxor.Blazor.Persistence
 {
-  public static FluxorOptions UsePersistence(
-    this FluxorOptions options,
-    Action<PersistOtions>? configurePersistOptions = null)
+  public static class OptionsPersistenceExtensions
   {
-    PersistOtions persistOptions = new();
-    configurePersistOptions?.Invoke(persistOptions);
-
-    options.AddMiddleware<PersistenceMiddleware>();
-    options.Services.Add(new ServiceDescriptor(
-        typeof(PersistOtions), persistOptions));
-
-    if (IsValidPersistenceType(persistOptions))
+    public static FluxorOptions UsePersistence(
+      this FluxorOptions options,
+      Action<PersistOtions>? configurePersistOptions = null)
     {
-      options.Services.AddBlazoredLocalStorageAsSingleton(options =>
-        options.JsonSerializerOptions.WriteIndented = true);
+      PersistOtions persistOptions = new();
+      configurePersistOptions?.Invoke(persistOptions);
 
+      options.AddMiddleware<PersistenceMiddleware>();
       options.Services.Add(new ServiceDescriptor(
-        typeof(ILocalStoragePersistenceService),
-        typeof(LocalStoragePersistenceService),
-        ServiceLifetime.Singleton));
+          typeof(PersistOtions), persistOptions));
+
+      if (IsValidPersistenceType(persistOptions))
+      {
+        options.Services.Add(new ServiceDescriptor(
+            typeof(IBrowserStorage),
+            GetStorageType(persistOptions.PersistenceType),
+            ServiceLifetime.Singleton));
+
+        options.Services.Add(new ServiceDescriptor(
+          typeof(ILocalStoragePersistenceService),
+          typeof(LocalStoragePersistenceService),
+          ServiceLifetime.Singleton));
+      }
+
+      return options;
     }
 
-    return options;
-  }
-
-  private static bool IsValidPersistenceType(PersistOtions persistOtions)
-  {
-    if (persistOtions.PersistenceType == PersistenceType.LocalStorage)
+    private static Type GetStorageType(PersistenceType persistenceType)
     {
-      return true;
+      if (persistenceType == PersistenceType.SessionStorage)
+      {
+        return typeof(SessionBrowserStorage);
+      }
+
+      return typeof(LocalBrowserStorage);
     }
 
-    throw new InvalidOperationException($"{persistOtions.PersistenceType} is not supported.");
+    private static bool IsValidPersistenceType(PersistOtions persistOtions)
+    {
+      if (persistOtions.PersistenceType == PersistenceType.LocalStorage || persistOtions.PersistenceType == PersistenceType.SessionStorage)
+      {
+        return true;
+      }
+
+      throw new InvalidOperationException($"{persistOtions.PersistenceType} is not supported.");
+    }
   }
 }

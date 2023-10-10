@@ -1,91 +1,96 @@
 ﻿using Fluxor.Blazor.Persistence.Store;
 using Fluxor.Blazor.Web.Middlewares.Routing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Fluxor.Blazor.Persistence.Tests")]
-namespace Fluxor.Blazor.Persistence;
-
-internal sealed class PersistenceMiddleware : Middleware
+namespace Fluxor.Blazor.Persistence
 {
-  private IStore? _store;
-  private readonly ILocalStoragePersistenceService _localStoragePersistenceService;
-  private readonly PersistOtions _persistOtions;
-  private IDispatcher? _dispatcher;
-  private readonly object _syncRoot = new();
-
-  public PersistenceMiddleware(
-    ILocalStoragePersistenceService localStoragePersistenceService,
-    PersistOtions persistOtions)
+  internal sealed class PersistenceMiddleware : Middleware
   {
-    _localStoragePersistenceService = localStoragePersistenceService;
-    _persistOtions = persistOtions;
-  }
+    private IStore? _store;
+    private readonly ILocalStoragePersistenceService _localStoragePersistenceService;
+    private readonly PersistOtions _persistOtions;
+    private IDispatcher? _dispatcher;
+    private readonly object _syncRoot = new();
 
-  public override async Task InitializeAsync(IDispatcher dispatcher, IStore store)
-  {
-    _store = store;
-    _dispatcher = dispatcher;
-
-    IEnumerable<IFeature> features = _store.Features.Values;
-
-    foreach (IFeature feature in features.OrderBy(x => x.GetName()))
+    public PersistenceMiddleware(
+      ILocalStoragePersistenceService localStoragePersistenceService,
+      PersistOtions persistOtions)
     {
-      try
-      {
-        string featureName = feature.GetName().ToLower();
-
-        if (featureName != "@routing" || (featureName == "@routing" && _persistOtions.PersistRoutes))
-        {
-          feature.StateChanged += Feature_StateChanged;
-          var featureState = await _localStoragePersistenceService.LoadAsync(
-          feature.GetName(),
-          feature.GetStateType()
-          ).ConfigureAwait(false);
-
-          if (featureState != null)
-          {
-            feature.RestoreState(featureState);
-          }
-
-          if (feature.GetName().ToLower() == "@routing")
-          {
-            string? routeUri = (featureState as RoutingState)?.Uri;
-
-            if (!string.IsNullOrWhiteSpace(routeUri))
-            {
-              _dispatcher.Dispatch(new GoAction(routeUri));
-            }
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        _dispatcher.Dispatch(new LoadPersistedStateFailureAction(feature.GetName(), ex));
-      }
+      _localStoragePersistenceService = localStoragePersistenceService;
+      _persistOtions = persistOtions;
     }
 
-    await Task.CompletedTask;
-  }
-
-  private void Feature_StateChanged(object? feature, EventArgs e)
-  {
-    if (feature != null)
+    public override async Task InitializeAsync(IDispatcher dispatcher, IStore store)
     {
-      IFeature stateChangeFeature = (IFeature)feature;
-      lock (_syncRoot)
+      _store = store;
+      _dispatcher = dispatcher;
+
+      IEnumerable<IFeature> features = _store.Features.Values;
+
+      foreach (IFeature feature in features.OrderBy(x => x.GetName()))
       {
         try
         {
-          string featureName = stateChangeFeature.GetName().ToLower();
-          if (featureName != "@statepersistence")
+          string featureName = feature.GetName().ToLower();
+
+          if (featureName != "@routing" || (featureName == "@routing" && _persistOtions.PersistRoutes))
           {
-            _localStoragePersistenceService.SaveAsync(
-                  stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
+            feature.StateChanged += Feature_StateChanged;
+            var featureState = await _localStoragePersistenceService.LoadAsync(
+            feature.GetName(),
+            feature.GetStateType()
+            ).ConfigureAwait(false);
+
+            if (featureState != null)
+            {
+              feature.RestoreState(featureState);
+            }
+
+            if (feature.GetName().ToLower() == "@routing")
+            {
+              string? routeUri = (featureState as RoutingState)?.Uri;
+
+              if (!string.IsNullOrWhiteSpace(routeUri))
+              {
+                _dispatcher.Dispatch(new GoAction(routeUri));
+              }
+            }
           }
         }
         catch (Exception ex)
         {
-          _dispatcher?.Dispatch(new SavePersistedStateFailureAction(stateChangeFeature.GetName(), ex));
+          _dispatcher.Dispatch(new LoadPersistedStateFailureAction(feature.GetName(), ex));
+        }
+      }
+
+      await Task.CompletedTask;
+    }
+
+    private void Feature_StateChanged(object? feature, EventArgs e)
+    {
+      if (feature != null)
+      {
+        IFeature stateChangeFeature = (IFeature)feature;
+        lock (_syncRoot)
+        {
+          try
+          {
+            string featureName = stateChangeFeature.GetName().ToLower();
+            if (featureName != "@statepersistence")
+            {
+              _localStoragePersistenceService.SaveAsync(
+                    stateChangeFeature.GetName(), stateChangeFeature.GetState()).ConfigureAwait(false);
+            }
+          }
+          catch (Exception ex)
+          {
+            _dispatcher?.Dispatch(new SavePersistedStateFailureAction(stateChangeFeature.GetName(), ex));
+          }
         }
       }
     }

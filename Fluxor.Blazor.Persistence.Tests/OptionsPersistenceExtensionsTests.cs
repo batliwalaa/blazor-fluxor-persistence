@@ -1,6 +1,6 @@
-﻿using Blazored.LocalStorage;
-using Bunit;
+﻿using Bunit;
 using FluentAssertions;
+using Fluxor.Blazor.Persistence.BrowserStorage;
 using Fluxor.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
@@ -27,7 +27,7 @@ public class OptionsPersistenceExtensionsTests : TestContextBase
       // Assert.
       Services.GetRequiredService<PersistOtions>().Should().NotBeNull();
       Services.GetRequiredService<PersistenceMiddleware>().Should().NotBeNull();
-      Services.GetRequiredService<ILocalStorageService>().Should().NotBeNull();
+      Services.GetRequiredService<IBrowserStorage>().Should().NotBeNull();
       Services.GetRequiredService<ILocalStoragePersistenceService>().Should().NotBeNull();
     }
 

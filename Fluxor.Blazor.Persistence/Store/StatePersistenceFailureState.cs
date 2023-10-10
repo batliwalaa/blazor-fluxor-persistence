@@ -1,13 +1,17 @@
-﻿namespace Fluxor.Blazor.Persistence.Store;
+﻿using System;
+using System.Collections.Generic;
 
-public class StatePersistenceExceptionItem
+namespace Fluxor.Blazor.Persistence.Store
 {
-  public string ActionType { get; set; } = string.Empty;
-  public string FeatureName { get; set; } = string.Empty;
-  public Exception? Exception { get; set; }
-}
+  public class StatePersistenceExceptionItem
+  {
+    public string ActionType { get; set; } = string.Empty;
+    public string FeatureName { get; set; } = string.Empty;
+    public Exception? Exception { get; set; }
+  }
 
-public record StatePersistenceFailureState
-{
-  public List<StatePersistenceExceptionItem> Errors { get; set; } = new();
+  public record StatePersistenceFailureState
+  {
+    public List<StatePersistenceExceptionItem> Errors { get; set; } = new();
+  }
 }

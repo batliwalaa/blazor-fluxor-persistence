@@ -105,4 +105,21 @@ Fix: do not restore feature state if persisted loaded state is null.
 
 ### Release 1.2.2 change log
 
-Added .net7.0 as target framework
+Added .net7.0 as target framework  
+
+
+### Release 1.2.3 change log
+
+Added .net5.0 as target framework
+Added support for session storage as persistenceType
+Removed nuget package Blazored.LocalStorage
+
+```C#
+builder.Services
+  .AddFluxor(o =>
+  {
+    o.ScanAssemblies(typeof(Program).Assembly)
+    .UseRouting()
+    .UsePersistence(x => x.PersistenceType = PersistenceType.SessionStorage);
+  });
+```

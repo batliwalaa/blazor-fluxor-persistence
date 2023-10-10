@@ -1,13 +1,16 @@
-﻿namespace Fluxor.Blazor.Persistence.Store;
+﻿using System;
 
-public class SavePersistedStateFailureAction
+namespace Fluxor.Blazor.Persistence.Store
 {
-  public string ActionType => "Save";
-  public string FeatureName { get; private set; } = string.Empty;
-  public Exception Exception { get; private set; }
+  public class SavePersistedStateFailureAction
+  {
+    public string ActionType => "Save";
+    public string FeatureName { get; private set; } = string.Empty;
+    public Exception Exception { get; private set; }
 
-  public SavePersistedStateFailureAction(
-    string featureName,
-    Exception exception
-   ) => (FeatureName, Exception) = (featureName, exception);
+    public SavePersistedStateFailureAction(
+      string featureName,
+      Exception exception
+     ) => (FeatureName, Exception) = (featureName, exception);
+  }
 }

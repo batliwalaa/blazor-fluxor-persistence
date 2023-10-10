@@ -1,13 +1,16 @@
-﻿namespace Fluxor.Blazor.Persistence.Store;
+﻿using System;
 
-public class LoadPersistedStateFailureAction
+namespace Fluxor.Blazor.Persistence.Store
 {
-  public string ActionType => "Load";
-  public string FeatureName { get; private set; } = string.Empty;
-  public Exception Exception { get; private set; }
+  public class LoadPersistedStateFailureAction
+  {
+    public string ActionType => "Load";
+    public string FeatureName { get; private set; } = string.Empty;
+    public Exception Exception { get; private set; }
 
-  public LoadPersistedStateFailureAction(
-    string featureName,
-    Exception exception
-   ) => (FeatureName, Exception) = (featureName, exception);
+    public LoadPersistedStateFailureAction(
+      string featureName,
+      Exception exception
+     ) => (FeatureName, Exception) = (featureName, exception);
+  }
 }
